@@ -9,9 +9,9 @@ from music_assistant_models.enums import MediaType
 from music_assistant_models.errors import MediaNotFoundError, ResourceTemporarilyUnavailable
 
 from .parsers import (
-    build_starred_tracks_playlist,
     parse_album,
     parse_artist,
+    parse_favorite_tracks_playlist,
     parse_playlist,
     parse_track,
 )
@@ -57,9 +57,6 @@ class TidalLibraryManager:
 
     async def get_playlists(self) -> AsyncGenerator[Playlist, None]:
         """Retrieve library playlists."""
-        # 0. Yield the virtual starred tracks playlist first
-        yield build_starred_tracks_playlist(self.provider)
-
         # 1. Get favorite mixes
         async for item in self.api.paginate(
             "favorites/mixes", item_key="items", base_url=self.api.BASE_URL_V2, cursor_based=True
@@ -72,6 +69,9 @@ class TidalLibraryManager:
         async for item in self.api.paginate(path):
             if item and item.get("playlist") and item["playlist"].get("uuid"):
                 yield parse_playlist(self.provider, item)
+
+        # 3. Get the virtual favorite tracks playlist
+        yield parse_favorite_tracks_playlist(self.provider)
 
     async def add_item(self, item: MediaItemType) -> bool:
         """Add item to library."""

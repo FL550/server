@@ -10,11 +10,11 @@ from music_assistant_models.enums import MediaType
 from music_assistant_models.errors import MediaNotFoundError
 from music_assistant_models.media_items import SearchResults
 
-from .constants import STARRED_TRACKS_PLAYLIST_ID
+from .constants import FAVORITE_TRACKS_PLAYLIST_ID
 from .parsers import (
-    build_starred_tracks_playlist,
     parse_album,
     parse_artist,
+    parse_favorite_tracks_playlist,
     parse_playlist,
     parse_track,
 )
@@ -111,8 +111,8 @@ class TidalMediaManager:
 
     async def get_playlist(self, prov_playlist_id: str) -> Playlist:
         """Get playlist details."""
-        if prov_playlist_id == STARRED_TRACKS_PLAYLIST_ID:
-            return build_starred_tracks_playlist(self.provider)
+        if prov_playlist_id == FAVORITE_TRACKS_PLAYLIST_ID:
+            return parse_favorite_tracks_playlist(self.provider)
 
         if prov_playlist_id.startswith("mix_"):
             return await self._get_mix_details(prov_playlist_id[4:])
@@ -192,8 +192,8 @@ class TidalMediaManager:
         page_size = 200
         offset = page * page_size
 
-        if prov_playlist_id == STARRED_TRACKS_PLAYLIST_ID:
-            return await self._get_starred_tracks(page_size, offset)
+        if prov_playlist_id == FAVORITE_TRACKS_PLAYLIST_ID:
+            return await self._get_favorite_tracks(page_size, offset)
 
         if prov_playlist_id.startswith("mix_"):
             return await self._get_mix_tracks(prov_playlist_id[4:], page_size, offset)
@@ -207,8 +207,8 @@ class TidalMediaManager:
         except MediaNotFoundError:
             return await self._get_mix_tracks(prov_playlist_id, page_size, offset)
 
-    async def _get_starred_tracks(self, limit: int, offset: int) -> list[Track]:
-        """Get the user's starred tracks in descending order (newest first)."""
+    async def _get_favorite_tracks(self, limit: int, offset: int) -> list[Track]:
+        """Get the user's favorite tracks in descending order (newest first)."""
         try:
             data = await self.api.get_data(
                 f"users/{self.provider.auth.user_id}/favorites/tracks",

@@ -44,4 +44,4 @@ CACHE_CATEGORY_RECOMMENDATIONS: Final[int] = 1
 CACHE_CATEGORY_ISRC_MAP: Final[int] = 2
 
 # Virtual playlist IDs
-STARRED_TRACKS_PLAYLIST_ID: Final[str] = "starred_tracks"
+FAVORITE_TRACKS_PLAYLIST_ID: Final[str] = "favorite_tracks"
